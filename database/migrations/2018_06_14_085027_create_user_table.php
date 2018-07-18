@@ -18,7 +18,7 @@ class CreateUserTable extends Migration
             $table->string('name')->unique();
             $table->string('email')->unique();
             $table->string('password');
-            $table->int('role')->default(0);
+            $table->integer('role')->default(0);
             $table->integer('point')->default(0);
             $table->date('birthday')->nullable();
             $table->string('job')->nullable();
