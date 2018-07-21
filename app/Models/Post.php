@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    //
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'topic_id', 
         'user_id', 
@@ -27,19 +31,65 @@ class Post extends Model
         'updated_at',
     ];
 
-    public function Topic(){
-        return $this->belongsTo('App\Models\Topic', 'topic_id');
+    /**
+     * One to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function topic()
+    {
+        return $this->belongsTo(Topic::class);
     }
 
-    public function User(){
-        return $this->belongsTo('App\Models\User', 'user_id');
+    /**
+     * One to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
-    public function Comment(){
-        return $this->hasMany('App\Models\Comment', 'post_id');
+    /**
+     * One to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 
-    public function Tag(){
-        return $this->belongsToMany('App\Models\Tag', 'post_tag', 'post_id', 'tag_id')->withTimestamps();
+    /**
+     * One to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
+     */
+    public function validComments()
+    {
+        return $this->comments()->whereHas('user', function ($query) {
+            $query->whereValid(true);
+        });
+    }
+
+    /**
+     * One to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
+     */
+    public function parentComments()
+    {
+        return $this->validComments()->whereParentId(null);
+    }
+
+    /**
+     * Many to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
     }
 }

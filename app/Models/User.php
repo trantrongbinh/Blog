@@ -15,7 +15,6 @@ class User extends Authenticatable
      *
      * @var array
      */
-
     protected $fillable = [
         'name', 
         'email', 
@@ -40,4 +39,35 @@ class User extends Authenticatable
         'password', 
         'remember_token',
     ];
+
+    /**
+     * One to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    /**
+     * One to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * One to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function follows()
+    {
+        return $this->hasMany(Follow::class);
+    }
+
 }

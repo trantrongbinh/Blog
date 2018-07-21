@@ -6,15 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tag extends Model
 {
-    // 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'tag', 
         'slug_tag', 
     ];
 
-    public $timestamps = true;
-
-    public function Post(){
-      return $this->belongsToMany('App\Models\Post', 'post_tag', 'post_id', 'tag_id');
+    /**
+     * Many to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function posts()
+    {
+      return $this->belongsToMany(Post::class);
     }
 }
