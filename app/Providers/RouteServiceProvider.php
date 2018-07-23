@@ -4,6 +4,10 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use App\Models\User;
+use App\Models\Topic;
+use App\Models\Post;
+
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -24,8 +28,11 @@ class RouteServiceProvider extends ServiceProvider
     public function boot()
     {
         //
-
         parent::boot();
+
+        Route::bind('post', function ($value) {
+            return Post::with('user', 'topic', 'tags')->findOrFail($value);
+        });
     }
 
     /**
