@@ -11,9 +11,14 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+/*
+|--------------------------------------------------------------------------
+| Frontend
+|--------------------------------------------------------------------------|
+*/
+
+// Home
+Route::name('home')->get('/', 'Front\PostController@index');
 
 Route::group(['middleware' => 'localization', 'prefix' => Session::get('locale')], function() {
     
