@@ -128,12 +128,6 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
-        'tags' => [
-            'regex' => 'Tags, separated by commas (no spaces), should have a maximum of 50 characters.',
-        ],
-        'meta_keywords' => [
-            'regex' => 'Keywords, separated by commas (no spaces), should have a maximum of 50 characters.',
-        ],
     ],
 
     /*

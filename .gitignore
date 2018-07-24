@@ -1,5 +1,7 @@
 /public/library
 /public/fonts
+public/ckeditor/
+public/ckfinder/
 /node_modules
 /public/hot
 /public/storage
