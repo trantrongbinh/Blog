@@ -5,7 +5,8 @@ namespace App\Repositories;
 use App\Models\ {
 	Post,
     Tag,
-    Comment
+    Comment,
+    Topic
 };
 use App\Services\Thumb;
 
@@ -58,7 +59,7 @@ class PostRepository
     protected function queryActiveOrderByDate()
     {
         return $this->model
-            ->select('id', 'user_id', 'title', 'slug_title', 'description', 'url_img', 'updated_at')
+            ->select('id', 'user_id', 'title', 'slug_title', 'description', 'content_post', 'url_img', 'updated_at')
             ->whereActive(true)
             ->latest();
     }
@@ -71,6 +72,90 @@ class PostRepository
     public function getActiveOrderByDate()
     {
         return $this->queryActiveOrderByDate()->paginate(10);
+    }
+
+    /**
+     * Get active posts for specified tag.
+     *
+     * @param  int  $nbrPages
+     * @param  int  $tag_id
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function getActiveOrderByDateForTag($nbrPages, $tag_id)
+    {
+        return $this->queryActiveOrderByDate()
+            ->whereHas('tags', function ($q) use ($tag_id) {
+                $q->where('tags.id', $tag_id);
+            })->paginate($nbrPages);
+    }
+
+    /**
+     * Get posts with comments page home.
+      *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function getPost()
+    {
+        // Post with user, tags and topics
+        $posts = $this->model->with([
+            'user' => function ($q) {
+                $q->select('id', 'name', 'email');
+            },
+            'tags' => function ($q) {
+                $q->select('tags.id', 'tag');
+            },
+            'topic' => function ($q) {
+                $q->select('id', 'name_topic', 'slug_topic');
+            },
+        ])
+        ->with(['parentComments' => function ($q) {
+            $q->with('user')
+                ->latest()
+                ->get();
+        }])
+        ->withCount('validComments')
+        ->withCount('parentComments')
+        ->whereActive(true)
+        ->latest()
+        ->get();
+        
+        return $posts;
+    }
+
+    /**
+     * Get post by slug.
+     *
+     * @param  string  $slug
+     * @return array
+     */
+    public function getPostBySlug($slug)
+    {
+        // Post for slug with user, tags and categories
+        $post = $this->model->with([
+            'user' => function ($q) {
+                $q->select('id', 'name', 'email');
+            },
+            'tags' => function ($q) {
+                $q->select('tags.id', 'tag');
+            },
+            'topic' => function ($q) {
+                $q->select('name_topic', 'slug_topic');
+            }
+        ])
+        ->with(['parentComments' => function ($q) {
+            $q->with('user')
+                ->latest()
+                ->take(config('app.numberParentComments'));
+        }])
+        ->withCount('validComments')
+        ->withCount('parentComments')
+        ->whereSlugTitle($slug)
+        ->firstOrFail();
+
+        // Previous post
+        // Next post
+
+        return compact('post');
     }
 
     /**

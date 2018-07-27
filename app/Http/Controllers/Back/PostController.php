@@ -105,7 +105,7 @@ class PostController extends Controller
      */
     public function update(PostRequest $request, Post $post)
     {
-        $this->authorize('manage', $user,$post);
+        $this->authorize('manage', $post);
         $this->repository->update($post, $request);
 
         return back()->with('message', __('The post has been successfully updated'));

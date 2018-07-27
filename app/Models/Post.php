@@ -25,7 +25,7 @@ class Post extends Model
         'url_img', 
         'view', 
         'type', 
-        'parent', 
+        'parent_id', 
         'rate', 
         'created_at', 
         'updated_at',
@@ -92,4 +92,26 @@ class Post extends Model
     {
         return $this->belongsToMany(Tag::class);
     }
+
+    /**
+     * One to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function rates()
+    {
+        return $this->hasMany(Rate::class);
+    }
+
+    /**
+     * One to Many relation
+     *
+     * @return bool
+     */
+    public function isRating($post_id)
+    {
+
+        return (bool)$this->rates()->where('post_id', $post_id)->first(['id']);
+    }
+
 }

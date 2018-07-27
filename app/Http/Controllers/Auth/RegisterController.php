@@ -74,6 +74,7 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'avata' => 'avata.png',
         ]);
 
         Mail::to($user->email)->send(new VerifyMail($user));
@@ -96,7 +97,7 @@ class RegisterController extends Controller
             }
         } else {
 
-            return redirect('/login')->with('warning', __('Sorry your email cannot be identified.');
+            return redirect('/login')->with('warning', __('Sorry your email cannot be identified.'));
         }
  
         return redirect('/login')->with('status', $status);

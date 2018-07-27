@@ -1,38 +1,21 @@
 <?php
 
 namespace App\Models;
-use App\Models\Comment;
 
-use Baum\Node;
+use Illuminate\Database\Eloquent\Model;
 
-class Comment extends Node
+class Rate extends Model
 {
-    /**
+
+	/**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'user_id', 
-        'post_id', 
-        'content_cmt', 
-        'parent_id',
-        'like', 
-        'dislike',
-        'status',
-        'created_at', 
-        'updated_at',
+        'user_id',
+        'post_id',
     ];
-
-    /**
-     * One to Many relation
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function post()
-    {
-    	return $this->belongsTo(Post::class);
-    }
 
     /**
      * One to Many relation
@@ -41,6 +24,17 @@ class Comment extends Node
      */
     public function user()
     {
-    	return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class);
     }
+
+    /**
+     * One to Many relation
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function post()
+    {
+        return $this->belongsTo(Post::class);
+    }
+
 }
