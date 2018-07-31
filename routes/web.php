@@ -17,11 +17,49 @@
 |--------------------------------------------------------------------------|
 */
 
-// Home
-Route::name('home')->get('/', 'Front\PostController@index');
-
 Route::group(['middleware' => 'localization', 'prefix' => Session::get('locale')], function() {
-    
+    // Home
+    Route::name('home')->get('/', 'Front\PostController@index');
+    Route::name('home.post.list')->post('home/{type}', 'Front\PostController@getPostByType');
+    //Topic
+    Route::name('topic')->get('topic/{topic}', 'Front\PostController@topic');
+    // Posts and comments
+    Route::prefix('posts')->namespace('Front')->group(function () {
+        Route::name('posts.display')->get('{slug}', 'PostController@show');
+        Route::name('posts.tag')->get('tag/{tag}', 'PostController@tag');
+        Route::name('posts.comments.store')->post('{post}/comments', 'CommentController@store');
+        Route::name('posts.comments.comments.store')->post('{post}/comments/{comment}/comments', 'CommentController@store');
+        Route::name('posts.comments')->get('{post}/comments/{page}', 'CommentController@comments');
+        Route::name('posts.questions')->post('questions/{type}', 'PostController@question');
+        Route::name('home.posts.create')->get('front/create', 'PostController@create');
+        Route::name('home.posts.store')->post('front/create', 'PostController@store');
+
+        Route::name('posts.search')->get('', 'PostController@search');
+    });
+    //User Following , Rating
+    Route::group(['middleware' => ['auth']], function () {
+        Route::post('/follow/{user}', 'Front\FollowController@follow');
+        Route::delete('/unfollow/{user}', 'Front\FollowController@unfollow');
+        Route::name('posts.rate')->put('posts/rate/{post}', 'Front\RateController@rate');
+    });
+    //Delete comment, post
+    Route::resource('posts', 'Front\PostController', [
+        'only' => ['edit', 'update', 'destroy'],
+        'names' => ['edit' => 'front.post.edit', 'update' => 'front.post.update', 'destroy' => 'front.posts.destroy'],
+    ]);
+    Route::resource('comments', 'Front\CommentController', [
+        'only' => ['destroy'],
+        'names' => ['destroy' => 'front.comments.destroy'],
+    ]);
+    Route::name('comment.update')->put('front/commet/update/{coment}', 'Front\CommentController@update');
+    //User
+    Route::resource('users', 'Front\UserController', [
+        'only' => ['index', 'show', 'update'],
+        'names' => ['index' => 'front.user.index', 'show' => 'front.user.show', 'update' => 'front.user.update'],
+    ]);
+
+    Route::name('front.user.avata')->post('front/user/avata/{user}', 'Front\UserController@avata');
+
     // Auth::routes();
     // Authentication Routes...
     Route::get('login', 'Auth\LoginController@showLoginForm')->name('login');
