@@ -61,14 +61,38 @@ class PostRepository
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function queryActiveOrderByDate()
+    protected function queryActivePost()
     {
         return $this->model
-            ->select('id', 'user_id', 'title', 'slug_title', 'description', 'content_post', 'url_img', 'updated_at', 'rate')
+            ->select('id', 'user_id', 'title', 'slug_title', 'description', 'content_post', 'url_img', 'updated_at', 'created_at', 'rate','type')
             ->whereActive(true)
+            ->with(['parentComments' => function ($q) {
+            $q->with('user')
+                ->latest()
+                ->take(config('app.numberParentComments'));
+            }])
             ->withCount('validComments')
-            ->withCount('parentComments')
-            ->latest();
+            ->withCount('parentComments');
+    }
+
+    /**
+     * Create a query for Post with user, tags, topic.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function queryActivePostWithRelated()
+    {
+        return $this->queryActivePost()->with([
+            'user' => function ($q) {
+                $q->select('id', 'name', 'email', 'avata');
+            },
+            'tags' => function ($q) {
+                $q->select('tags.id', 'tag');
+            },
+            'topic' => function ($q) {
+                $q->select('id', 'name_topic', 'slug_topic');
+            },
+        ]);
     }
 
     /**
@@ -78,10 +102,8 @@ class PostRepository
      */
     public function getActiveOrderByDate()
     {
-        return $this->queryActiveOrderByDate()->paginate(10);
+        return $this->queryActivePost()->latest()->paginate(10);
     }
-
-    
 
     /**
      * Get active posts for specified tag.
@@ -92,16 +114,10 @@ class PostRepository
      */
     public function getActiveOrderByDateForTag($nbrPages, $tag_id)
     {
-        return $this->queryActiveOrderByDate()
+        return $this->queryActivePost()
             ->whereHas('tags', function ($q) use ($tag_id) {
                 $q->where('tags.id', $tag_id);
-            })->with(['parentComments' => function ($q) {
-                $q->with('user')
-                    ->latest()
-                    ->get();
-            }])
-            ->withCount('validComments')
-            ->withCount('parentComments')->paginate($nbrPages);
+            })->latest()->paginate($nbrPages);
     }
 
     /**
@@ -113,48 +129,24 @@ class PostRepository
      */
     public function getActiveOrderByDateForTopic($nbrPages, $topic_slug)
     {
-        return $this->queryActiveOrderByDate()
+        return $this->queryActivePost()
         ->whereHas('topic', function ($q) use ($topic_slug) {
             $q->where('topics.slug_topic', $topic_slug);
-        })->with(['parentComments' => function ($q) {
-            $q->with('user')
-                ->latest()
-                ->get();
-        }])
-        ->withCount('validComments')
-        ->withCount('parentComments')->paginate($nbrPages);
+        })->latest()->paginate($nbrPages);
     }
 
     /**
-     * Get posts with comments page home.
+     * Get posts collection paginated with comments page home.
       *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function getPost($nbrPages)
+    public function getAll($nbrPages, $parameters)
     {
         // Post with user, tags and topics
-        $posts = $this->model->with([
-            'user' => function ($q) {
-                $q->select('id', 'name', 'email', 'avata');
-            },
-            'tags' => function ($q) {
-                $q->select('tags.id', 'tag');
-            },
-            'topic' => function ($q) {
-                $q->select('id', 'name_topic', 'slug_topic');
-            },
-        ])
-        ->with(['parentComments' => function ($q) {
-            $q->with('user')
-                ->latest()
-                ->get();
-        }])
-        ->withCount('validComments')
-        ->withCount('parentComments')
-        ->whereActive(true)
-        ->latest()
-        ->paginate($nbrPages);
-        
+        $posts = $this->queryActivePostWithRelated()->latest()->when($parameters['type'], function ($query) use ($parameters) {
+                $query->whereType($parameters['type']);
+            })->paginate($nbrPages);
+
         return $posts;
     }
 
@@ -167,25 +159,9 @@ class PostRepository
     public function getPostBySlug($slug)
     {
         // Post for slug with user, tags and topics
-        $post = $this->model->with([
-            'user' => function ($q) {
-                $q->select('id', 'name', 'email', 'avata');
-            },
-            'tags' => function ($q) {
-                $q->select('tags.id', 'tag');
-            },
-            'topic' => function ($q) {
-                $q->select('name_topic', 'slug_topic');
-            }
-        ])
-        ->with(['parentComments' => function ($q) {
-            $q->with('user')
-                ->latest()
-                ->take(config('app.numberParentComments'));
-        }])
-        ->withCount('validComments')
-        ->withCount('parentComments')
+        $post = $this->queryActivePostWithRelated()
         ->whereSlugTitle($slug)
+        ->latest()
         ->firstOrFail();
 
         // Previous post
@@ -241,25 +217,7 @@ class PostRepository
     public function getPostByType($type, $nbrPages)
     {
         // Post with user, tags and topics
-        $posts = $this->model->with([
-            'user' => function ($q) {
-                $q->select('id', 'name', 'email', 'avata');
-            },
-            'tags' => function ($q) {
-                $q->select('tags.id', 'tag');
-            },
-            'topic' => function ($q) {
-                $q->select('id', 'name_topic', 'slug_topic');
-            },
-        ])
-        ->with(['parentComments' => function ($q) {
-            $q->with('user')
-                ->latest()
-                ->get();
-        }])
-        ->withCount('validComments')
-        ->withCount('parentComments')
-        ->whereActive(true)
+        $posts = $this->queryActivePostWithRelated()
         ->where('type', $type)
         ->orderBy('rate', 'desc')
         ->paginate($nbrPages);
@@ -268,37 +226,18 @@ class PostRepository
     }
 
     /**
-     * Get post by slug.
+     * Get post by user.
      *
      * @param  string  $slug
      * @return array
      */
-    public function getPostByUser($user_id)
+    public function getPostByUser($user_id, $nbrPages)
     {
         // Post for slug with user, tags and categories
-        $posts = $this->model->with([
-            'user' => function ($q) {
-                $q->withCount('follows');
-            },
-            'tags' => function ($q) {
-                $q->select('tags.id', 'tag');
-            },
-            'topic' => function ($q) {
-                $q->select('name_topic', 'slug_topic');
-            }
-        ])
-        ->with(['parentComments' => function ($q) {
-            $q->with('user')
-                ->latest()
-                ->take(config('app.numberParentComments'));
-        }])
-        ->withCount('validComments')
-        ->withCount('parentComments')
+        $posts = $this->queryActivePostWithRelated()
         ->where('user_id', $user_id)
-        ->get();
-
-        // Previous post
-        // Next post
+        ->latest()
+        ->paginate($nbrPages);
 
         return compact('posts');
     }
@@ -378,7 +317,7 @@ class PostRepository
      */
     // public function search($n, $search)
     // {
-    //     $posts = $this->queryActiveOrderByDate()
+    //     $posts = $this->queryActivePost()
     //     ->where(function ($q) use ($search) {
     //         $q->where('title', 'like', "%$search%")
     //             ->orwhere('slug_title', 'like', "%$search%")
@@ -393,10 +332,10 @@ class PostRepository
 
     public function search($n, $search)
     {
-        $posts = $this->queryActiveOrderByDate()
+        $posts = $this->queryActivePost()
         ->where(function ($q) use ($search) {
             $q->search($search);
-        })->paginate($n);
+        })->latest()->paginate($n);
 
         $posts->tags = Tag::select('tags.id', 'tag')->where('tag', 'like', "%$search%")->get();
         

@@ -52,8 +52,6 @@
     <script src="{{ asset('library/dist/js/adminlte.min.js') }}"></script>
     <!-- Slug text -->
     <script src="{{ asset('library/plugins/voca/voca.min.js') }}"></script>
-    <!-- Editor -->
-    <script src="{{asset('ckeditor/ckeditor.js') }}"></script>
     <!-- My js -->
     <script src="{{asset('js/ajax-loading.js')}}"></script>
 

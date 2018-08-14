@@ -86,7 +86,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return view('front.pages.profile', array_merge($this->postRepository->getPostByUser($user->id), compact('user')));
+        return view('front.pages.profile', array_merge($this->postRepository->getPostByUser($user->id, $this->nbrPages), compact('user')));
     }
 
     /**

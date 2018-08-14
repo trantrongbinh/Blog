@@ -1,4 +1,4 @@
- @foreach($posts as $post)
+@foreach($posts as $post)
     @php
         $count = $post->user->countFollowing($post->user->id);
     @endphp

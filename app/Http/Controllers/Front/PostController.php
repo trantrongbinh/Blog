@@ -17,12 +17,14 @@ use App\ {
 
 class PostController extends Controller
 {
+    use Indexable;
+
     /**
      * The PostRepository instance.
      *
      * @var \App\Repositories\PostRepository
      */
-    protected $postRepository;
+    //protected $postRepository;
 
     /**
      * The pagination number.
@@ -34,12 +36,13 @@ class PostController extends Controller
     /**
      * Create a new PostController instance.
      *
-     * @param  \App\Repositories\PostRepository $postRepository
+     * @param  \App\Repositories\PostRepository $repository
      * @return void
     */
-    public function __construct(PostRepository $postRepository)
+    public function __construct(PostRepository $repository)
     {
-        $this->postRepository = $postRepository;
+        $this->repository = $repository;
+        $this->table = 'posts';
         $this->nbrPages = config('app.nbrPages.front.posts');
     }
 
@@ -48,12 +51,12 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        $posts = $this->postRepository->getPost($this->nbrPages);
+    // public function index()
+    // {
+    //     $posts = $this->repository->getAll($this->nbrPages);
 
-        return view('front.pages.home', compact('posts'));
-    }
+    //     return view('front.pages.home', compact('posts'));
+    // }
 
     /**
      * Display the detail post by slug.
@@ -67,7 +70,7 @@ class PostController extends Controller
         // dd($slug);
         $user = $request->user();
 
-        return view('front.pages.detail', array_merge($this->postRepository->getPostBySlug($slug), compact('user')));
+        return view('front.pages.detail', array_merge($this->repository->getPostBySlug($slug), compact('user')));
     }
 
     /**
@@ -80,7 +83,7 @@ class PostController extends Controller
         $topics = Topic::all()->pluck('name_topic', 'id');
         $tags = Tag::all()->pluck('tag', 'id');
 
-        return view('front.pages.post', ['topics'=>$topics, 'tags'=>$tags]);
+        return view('front.pages.write-post', ['topics'=>$topics, 'tags'=>$tags]);
     }
 
     /**
@@ -97,7 +100,7 @@ class PostController extends Controller
             'seo_title' => $request->slug_title,
             'active' => 1,
         ]);
-        $this->postRepository->store($request);
+        $this->repository->store($request);
 
         return back()->with('message', __('The post has been successfully created'));
     }
@@ -136,7 +139,7 @@ class PostController extends Controller
             'meta_keyword' => 'New Post, TTB Blogs',
             'seo_title' => $request->slug_title,
         ]);
-        $this->postRepository->update($post, $request);
+        $this->repository->update($post, $request);
 
         return back()->with('message', __('The post has been successfully updated'));
     }
@@ -163,7 +166,7 @@ class PostController extends Controller
      */
     public function tag(Tag $tag)
     {
-        $posts = $this->postRepository->getActiveOrderByDateForTag($this->nbrPages, $tag->id);
+        $posts = $this->repository->getActiveOrderByDateForTag($this->nbrPages, $tag->id);
         $info = __('Posts found with tag ') . '<strong>' . $tag->tag . '</strong>';
 
         return view('front.pages.list-post', compact('posts', 'info'));
@@ -177,7 +180,7 @@ class PostController extends Controller
      */
     public function topic(Topic $topic)
     {
-        $posts = $this->postRepository->getActiveOrderByDateForTopic($this->nbrPages, $topic->slug_topic);
+        $posts = $this->repository->getActiveOrderByDateForTopic($this->nbrPages, $topic->slug_topic);
         $info = __('Posts for Topic: ') . '<strong>' . $topic->name_topic . '</strong>';
 
         return view('front.pages.list-post', compact('posts', 'info'));
@@ -194,7 +197,7 @@ class PostController extends Controller
         $request->merge([
             'type' => $type,
         ]);
-        $this->postRepository->store($request);
+        $this->repository->store($request);
 
         return back()->with('message', __('The post has been successfully created'));
     }
@@ -206,8 +209,8 @@ class PostController extends Controller
      */
     public function getPostByType($type)
     {
-        $posts = $this->postRepository->getPostByType($type, $this->nbrPages);
-
+        $posts = $this->repository->getPostByType($type, $this->nbrPages);
+        
         return [
             'html' => view('front/partials/home-list', compact('posts'))->render(),
         ];
@@ -223,7 +226,7 @@ class PostController extends Controller
     public function search(SearchRequest $request)
     {
         $search = $request->search;
-        $posts = $this->postRepository->search($this->nbrPages, $search)->appends(compact('search'));
+        $posts = $this->repository->search($this->nbrPages, $search)->appends(compact('search'));
         $info = __('Posts found with search: ') . '<strong>' . $search . '</strong>';
 
         return view('front.pages.search', compact('posts', 'info'));

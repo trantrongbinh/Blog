@@ -17,9 +17,6 @@ class Comment extends Node
         'post_id', 
         'content_cmt', 
         'parent_id',
-        'like', 
-        'dislike',
-        'status',
         'created_at', 
         'updated_at',
     ];

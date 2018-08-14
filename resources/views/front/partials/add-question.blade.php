@@ -76,7 +76,7 @@
     </div>
     <!-- /.col -->
     @else
-            <img class="img-circle" src="https://d30y9cdsu7xlg0.cloudfront.net/png/88093-200.png" alt="User Image">
+            <img class="img-circle" src="/upload/images/avatar.png" alt="User Image">
                 <span class="username"> <a href="{{ route('login') }}"><span class="description add-question"><strong> What is your question?</strong></span></a></span>
             </div>
         </div>

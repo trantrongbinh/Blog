@@ -60,7 +60,7 @@
     </nav>
     @else
             <li class="nav-item">
-                <a style="margin: 5px 10px 0 0;" class="btn btn-danger btn-sm" href="{{route('home.posts.create') }}"><strong><span class="fa fa-edit"></span> Post</strong></a>
+                <a style="margin: 5px 10px 0 0;" class="btn btn-danger btn-sm" href="{{route('home.posts.create') }}" target='_blank'><strong><span class="fa fa-edit"></span> Post</strong></a>
             </li>
             <!-- Notifications Dropdown Menu -->
             <li class="nav-item dropdown">

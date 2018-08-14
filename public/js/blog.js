@@ -52,31 +52,37 @@ $('#goTop').click(function() {
     return false;
 });
 
-// $(document).ready(function(){
-//     $(window).scroll(function(){
-//         if($(window).scrollTop()==$(document).height()-$(window).height()){
-//             alert('binh');
-//         }
-//     });
-// });
-
-// scroll page home
-$('ul.pagination').hide();
-
-$(function() {
-    $('.infinite-scroll').jscroll({
-        autoTrigger: true,
-        loadingHtml: " <div class='col-sm-12  row justify-content-center align-items-center'><i class='fa fa-circle-o-notch fa-spin' style='font-size: 30px; text-align: center; padding: 20px;'></i></div> ",
-        padding: 0,
-        nextSelector: '.pagination li.active + li a',
-        contentSelector: 'div.infinite-scroll',
-        callback: function() {
-            // xóa thanh phân trang ra khỏi html mỗi khi load xong nội dung
-            $('ul.pagination').remove();
-        }
-    });
+//auto load pages wwith ajax
+var page = 1;
+$(window).scroll(function() {
+    if($(window).scrollTop() + $(window).height() >= $(document).height()) {
+        var type =  $('#type').text()
+        page++;
+        loadMoreData(page, type);
+    }
 });
-// end
+
+function loadMoreData(page, type){
+  $.ajax({
+        url: '?type='+ type +'&page=' + page,
+        type: "get",
+        beforeSend: function(){
+            $('.ajax-load').show();
+        }
+    })
+    .done(function(data){
+        if(data.list == " "){
+            $('.ajax-load').html("No more records found");
+            return;
+        }
+        $('.ajax-load').hide();
+        $("#list-post").append(data.list);
+    })
+    .fail(function(jqXHR, ajaxOptions, thrownError){
+          alert('server not responding...');
+    });
+}
+//end
 
 // get post by type at home
 function readMore(id) {
@@ -85,31 +91,31 @@ function readMore(id) {
     $('#des' + id).hide();
 }
 
-function getList(type) {
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-        }
-    });
-    $.ajax({
-        url: 'home/' + type,
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            '_token': $('input[name=_token]').val(),
-            'type': type
-        },
-        success: function(data) {
+var done = function (data) {
+    $('#list-post').html(data.list)
+    $('#pagination').html(data.pagination)
+    $('#type').text(data.type)
+}
 
-            console.log('ok');
-            $('.infinite-scroll').html(data.html)
-            console.log(data);
-        },
-        error: function(error) {
-            console.log('error');
-            console.log(error);
-        }
-    });
+var fail = function (errorAjax) {
+    console.log(errorAjax)
+}
+
+var buildParameters = function (type) {
+    return {
+        type: type
+    }
+}
+
+function getList(type) {
+    page = 1;
+    $.get('/',  buildParameters(type))
+    .done(function (data) {
+        done(data)
+    })
+    .fail(function (errorAjax) {
+        fail(errorAjax)
+    })
 }
 // end
 

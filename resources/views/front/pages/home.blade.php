@@ -51,7 +51,7 @@
                             <ul class="nav nav-pills">
                                 <li class="nav-item" onclick="window.location.href = window.location.href"><a class="nav-link active btn-outline-info" href="#activity" data-toggle="tab">All</a></li>
                                 <li class="nav-item" onclick="getList(1)"><a class="nav-link btn-outline-info" href="#activity" data-toggle="tab">Posts</a></li>
-                                <li class="nav-item" onclick="getList(0)"><a class="nav-link btn-outline-info" href="#activity" data-toggle="tab">Questions</a></li>
+                                <li class="nav-item" onclick="getList(2)"><a class="nav-link btn-outline-info" href="#activity" data-toggle="tab">Questions</a></li>
                             </ul>
                             @include('front.partials.add-question')
                         </div>
@@ -61,9 +61,15 @@
                                 <div class="active tab-pane" id="activity">
                                     <!-- Post -->
                                     <div class="row infinite-scroll">
-                                        @include('front/partials/home-list')
-                                        <div class="row">
-                                            {{ $posts->links() }}
+                                        <p id="type" class="hide">{{$type}}</p>
+                                        <div id="list-post">
+                                            @include('front/partials/home-list', compact('posts'))
+                                        </div>
+                                        <div id="pagination" class="hide">
+                                            {{ $links }}
+                                        </div>
+                                        <div class="ajax-load text-center" style="display:none; margin: 0 auto; padding: 20px;" >
+                                            <p><img src="/upload/images/loader.gif">Loading More post</p>
                                         </div>
                                     </div>
                                     <!-- /.post -->
