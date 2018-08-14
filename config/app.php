@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -151,6 +150,7 @@ return [
          * Package Service Providers...
          */
         Collective\Html\HtmlServiceProvider::class,
+        Baum\Providers\BaumServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -160,7 +160,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
+        App\Providers\ElfinderServiceProvider::class,
     ],
 
     /*
@@ -212,5 +212,40 @@ return [
         'Form' => Collective\Html\FormFacade::class,
         'Html' => Collective\Html\HtmlFacade::class,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pagination Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'nbrPages' => [
+        'front' => [
+            'posts' => 3,
+            'users' => 10,
+        ],
+        'back' => [
+            'posts' => 5,
+            'users' => 8,
+            'comments' => 3,
+            'contacts' => 3,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Comments nesting level
+    |--------------------------------------------------------------------------
+    */
+
+    'commentsNestedLevel' => 4,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Number parent comments to show each time
+    |--------------------------------------------------------------------------
+    */
+
+    'numberParentComments' => 2,
 
 ];

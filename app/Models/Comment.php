@@ -3,9 +3,9 @@
 namespace App\Models;
 use App\Models\Comment;
 
-use Illuminate\Database\Eloquent\Model;
+use Baum\Node;
 
-class Comment extends Model
+class Comment extends Node
 {
     /**
      * The attributes that are mass assignable.
@@ -16,10 +16,7 @@ class Comment extends Model
         'user_id', 
         'post_id', 
         'content_cmt', 
-        'parent',
-        'like', 
-        'dislike',
-        'status',
+        'parent_id',
         'created_at', 
         'updated_at',
     ];

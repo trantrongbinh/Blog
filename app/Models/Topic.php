@@ -17,6 +17,16 @@ class Topic extends Model
     ];
 
     /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return request()->segment(1) === 1 ? 'id' : 'slug_topic';
+    }
+
+    /**
 	* One to Many relation
 	*
 	* @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -25,4 +35,6 @@ class Topic extends Model
     {
     	return $this->hasMany(Post::class);
     }
+    
+
 }
