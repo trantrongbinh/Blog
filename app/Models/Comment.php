@@ -7,6 +7,8 @@ use Baum\Node;
 
 class Comment extends Node
 {
+    use IngoingTrait;
+    
     /**
      * The attributes that are mass assignable.
      *

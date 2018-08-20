@@ -13,10 +13,14 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'App\Events\Event' => [
-            'App\Listeners\EventListener',
+        'App\Events\ModelCreated' => [
+            'App\Listeners\ModelCreated',
+        ],
+        'App\Events\PostUpdated' => [
+            'App\Listeners\PostUpdated',
         ],
     ];
+
 
     /**
      * Register any events for your application.

@@ -10,20 +10,36 @@ use Intervention\Image\Facades\Image;
 class Thumb
 {
     /**
-     * Make thumb image path
+     * Make thumb if Post model
      *
-     * @param $img
+     * @param \Illuminate\Database\Eloquent\Model $model
      * @return void
      */
-    public static function makeThumbPath($img, $str)
+    public static function makeThumb(Model $model)
     {
-        $url = substr(time() . mt_rand() . '_' . $img->getClientOriginalName(), -190); 
-        while (file_exists(getUrlFileUpload($img->getClientOriginalExtension(), $str). $url)) {
-            $url = substr(time() . mt_rand() . '_' . $img->getClientOriginalName(), -190);
+        if ($model instanceof Post) {
+            $path = $model->url_img;
+            $dir = dirname ($path);
+            if ($dir != '\files') {
+                $dir = substr_replace ($dir, '', 0, 7);
+                if (!in_array($dir , Storage::disk('thumbs')->directories())) {
+                    Storage::disk('thumbs')->makeDirectory($dir);
+                }
+            }
+            $image = Image::make(url($model->url_img))->widen(100);
+            Storage::disk('thumbs')->put(substr_replace (self::makeThumbPath($path), '', 0, 7), $image->encode());
         }
-        $img->move(getUrlFileUpload($img->getClientOriginalExtension(), $str), $url);
-
-        return $url;
     }
 
+    /**
+     * Make thumb path
+     *
+     * @param $path
+     * @return mixed
+     */
+    public static function makeThumbPath($path)
+    {
+        $path = substr_replace ($path, '/thumbs', 0, 6);
+        return substr_replace ($path, '-thumb', -4, 0);
+    }
 }
