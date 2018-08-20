@@ -35,25 +35,17 @@ class PostRepository
     protected $model;
 
     /**
-     * The Upload instance.
-     *
-     * @var App\Services\Thumb
-     */
-    protected $thumb;
-
-    /**
      * Create a new BlogRepository instance.
      *
      * @param  \App\Models\Post $post
      * @param  \App\Models\Tag $tag
      * @param  \App\Models\Comment $comment
      */
-    public function __construct(Post $post, Tag $tag, Comment $comment, Thumb $thumb)
+    public function __construct(Post $post, Tag $tag, Comment $comment)
     {
         $this->model = $post;
         $this->tag = $tag;
         $this->comment = $comment;
-        $this->thumb = $thumb;
     }
 
     /**
@@ -67,10 +59,11 @@ class PostRepository
             ->select('id', 'user_id', 'title', 'slug_title', 'description', 'content_post', 'url_img', 'updated_at', 'created_at', 'rate','type')
             ->whereActive(true)
             ->with(['parentComments' => function ($q) {
-            $q->with('user')
-                ->latest()
-                ->take(config('app.numberParentComments'));
-            }])
+                $q->with('user')
+                    ->latest()
+                    ->get();
+                }
+            ])
             ->withCount('validComments')
             ->withCount('parentComments');
     }

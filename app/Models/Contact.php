@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Contact extends Model
 {
-    // use IngoingTrait;
+    use IngoingTrait;
 
     /**
      * The event map for the model.
